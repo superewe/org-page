@@ -1,0 +1,92 @@
+#+TITLE:     Org-page: 静态站点生成器
+#+AUTHOR:    superewe
+#+EMAIL:     superewe@qq.com
+#+DATE:      2017-06-14
+
+* 简介
+ 
+Org-page是一个基于 [[http://orgmode.org/][org-mode]] 的静态站点生成器.
+  
+Org-page具有以下特性：
+
+ 1) 使用git管理org源文件和生成的html文件
+ 2）增量发布(采用  =git diff= 命令）
+ 3）支持分类
+ 4）支持标签 （自动生成）
+ 5）支持RSS （自动生成）
+ 6）支持搜索引擎（自动生成）
+ 7）漂亮的主题
+ 8）支持主题定制
+ 9）支持评论（支持disqus/duoshuo/hashover）
+ 10) 站点流量分析（通过google analytical实现）
+ 11）支持目录/关于页（没有提供默认的，会自动生成）
+ 12）站点预览
+ 13）高度可定制
+
+ *[[http://kelvinh.github.com][这里]] 是我使用org-page生成的个人站点.html文件和org源文件位于[[https://github.com/kelvinh/kelvinh.github.com]] .如果你想尝试org-page，可以把他当作一个例子.*
+
+* 工作流程
+ 1. 新建一个git 仓库，其中 org源文件在 "source"分支，生成的html文件在"master"分支（这个分支名字可以自己定义）.仓库可以手动方式创建，也可以使用org-page的 =op/new-repository= 命令. 
+ 2.指定一个"base commit" (如果不指定，会使用最新提交的前一次提交作为base commit). org-page会读取最新提交和source分支中基准提交的差异。这些差异会被标记，为发布做准备.差异包括添加、修改、删除. *org-page目标是处理所有类型的差异，因为删除操作不是经常发生，删除操作现在还没有实现*
+ 3. org-page进行发布的准备工作. 
+ 4. 发布第2步中标记的差异.
+ 5. 更新目录页中的分类和标签 
+ 6. 发布完成
+
+* 使用
+ *这里是怎样使用org-page的简单介绍，详细介绍和配置，请阅读doc文件夹中的quick-guide.org文件*
+
+** 安装
+org-page可以在 [[http://melpa.milkbox.net/][melpa]] 中获取，推荐从emacs包管理系统中安装。详细的安装指导，请阅读doc文件夹中的quick-guide.org文件
+
+** 配置
+
+在.emacs中添加以下代码：
+
+   : ;;; the following is only needed if you install org-page manually
+   : (add-to-list 'load-path "path/to/org-page")
+   : (require 'org-page)
+   : (setq op/repository-directory "path/to/your/org/repository")
+   : (setq op/site-domain "http://your.personal.site.com/")
+   : ;;; for commenting, you can choose either disqus, duoshuo or hashover
+   : (setq op/personal-disqus-shortname "your_disqus_shortname")
+   : (setq op/personal-duoshuo-shortname "your_duoshuo_shortname")
+   : (setq op/hashover-comments t)
+   : ;;; the configuration below are optional
+   : (setq op/personal-google-analytics-id "your_google_analytics_id")
+
+** 发布
+执行下面代码，发布你博客的更新
+
+: (op/do-publication nil "HEAD^1" "~/org-pub/" nil)
+
+或者
+
+: (op/do-publication)
+
+也可以交互的方式发布
+: =M-x op/do-publication <Enter>=
+
+*提示* ： org-page不会自动提交你的org文件到repo，需要你在发布前手动添加他们.
+
+** 预览
+
+   执行 =M-x op/do-publication-and-preview-site <Enter>=, 生成的文章存放在 =~/.op-tmp=, 随后自动在浏览器中打开生成的文章
+
+* 依赖
+
+  1. [[http://www.gnu.org/software/emacs/][emacs]]: 这是一个必须要存在的依赖
+  2. [[http://orgmode.org/][org mode]]: v8.0 以上版本, 执行 =M-x org-version <RET>= 确认你的org-mode版本不低于v8.0
+  3. [[http://git-scm.com][git]]: 自由开源的版本控制系统
+  4. [[https://github.com/Wilfred/mustache.el][mustache.el]]: emacs需要的模板库
+  5. [[http://fly.srk.fer.hr/~hniksic/emacs/htmlize.el.cgi][htmlize.el]]: emacs自带，用于语法高亮的库
+  6. [[https://github.com/magnars/dash.el][dash.el]]: 现代化的列表库
+  7. [[https://github.com/Wilfred/ht.el][ht.el]]: 哈希表的库
+  8. [[https://github.com/skeeto/emacs-web-server][simple-httpd]]: 站点预览时用到的简单的web服务器
+  9. [[https://github.com/rejeep/git.el][git.el]]: 编程的方式使用git所需要的api 
+
+* 已知问题
+
+  - 删除的操作还没有实现。要删除org源文件，你需要手动删除该org文件生成的相应html文件
+  - 不支持URI路径改变的检测.比如, 你发布一篇文章,使用的URI是 "/blog/2013/03/25/the-old-post-name" ，当你在org源文件中修改这个值，org-page不会检测到, 会生成一个新的html文件.你需要手动删除旧的URI对应的html文件
+    

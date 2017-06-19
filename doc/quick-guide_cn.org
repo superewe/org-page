@@ -1,0 +1,112 @@
+#+TITLE:       Quick Guide for Org-page
+#+AUTHOR:      superewe
+#+EMAIL:       superewe@qq.com
+#+DATE:        2017-06-19
+
+
+* 安装
+** 手动安装 (不推荐)
+首先安装 *README.org* 列出的依赖
+
+   获取源码:
+
+   : git clone https://github.com/kelvinh/org-page.git
+
+将源码所在目录添加到 emacs的  =load-path= 变量中，以便emacs能找到 oeg-page
+
+** 使用包管理系统（强烈推荐）
+   
+在 =init.el= 添加以下代码:
+
+   : (require 'package)
+   : (package-initialize)
+   : (add-to-list 'package-archives
+   :              '("melpa" . "http://melpa.milkbox.net/packages/") t)
+
+   使用下面命令安装org-page:
+
+   : M-x package-install org-page
+
+* 配置
+
+org-page必须的配置非常简单，emacs配置文件中加入 :
+
+  : (add-to-list 'load-path "path/to/org-page")                    ;; only needed if you install org-page manually
+  : (require 'org-page)
+  : (setq op/repository-directory "path/to/your/org/repository")   ;; the repository location
+  : (setq op/site-domain "http://your.personal.site.com/")         ;; your domain
+  : ;;; the configuration below you should choose one, not both
+  : (setq op/personal-disqus-shortname "your_disqus_shortname")    ;; your disqus commenting system
+  : (setq op/personal-duoshuo-shortname "your_duoshuo_shortname")  ;; your duoshuo commenting system
+  : (setq op/hashover-comments t)                                   ;; activate hashover self-hosted comment system
+* 其他配置
+查看全部配置选项，执行 =M-x customize-group= 之后输入 "=org-page=".
+* 发布
+你可以重新发布所有org源文件，或者只发布上次发布之后修改过的文件
+
+发布所有文件，执行:
+
+  : (op/do-publication t nil nil t)
+
+发布上次提交之后有更新的文件，执行:
+
+  : (op/do-publication)
+
+推荐使用 =M-x= 执行命令，可以看到更多选项细节
+
+* 预览
+发布之前进行预览，执行:
+
+ : (op/do-publication-and-preview-site)
+
+执行命令之后，你的org文件生成的html文件生成到 =op/site-preview-directory= , 默认为 =~/.op-tmp= ，并在本机被 [[https://github.com/skeeto/emacs-web-server][simple-httpd]] 解析，在浏览器中自动打开 .  =op/site-preview-directory= 支持自定义.阅读 =op/do-publication-and-preview-site= 帮助查看更多信息
+
+* FAQ
+
+  1. 手动初始化仓库很繁琐？使用 =op/new-repository= 命令可以自动完成
+
+  2. 发布文章设置必需的属性更简单？使用 =op/new-post= 命令
+
+  3. 在post buffer插入必需的属性？使用 =op/insert-options-template= 命令
+
+  4. 默认的slogan太丑？配置一个更好的（在每一片文章中显示）):
+
+     : (setq op/site-main-title "your main slogan")
+     : (setq op/site-sub-title "your sub slogan")
+
+  5. 保存org源文件的分支不是命名为 "source"? 替换默认的分支名字为source :
+
+     : (setq op/repository-org-branch "your source branch name") ;; default is "source"
+     : (setq op/repository-html-branch "your html branch name")  ;; default is "master"
+
+  6. 已经有github帐号，关联帐号:
+
+     : (setq op/personal-github-link "your github link")
+
+  7.使用Google Analytics 站点流量分析 ?
+
+     : (setq op/personal-google-analytics-id "your google analytics id")
+
+  8. 某些分类的文章禁用评论?
+
+     : (setq op/category-config-alist
+     :       (cons '("photography" ;; category name goes here
+     :               :show-comment nil)
+     :             op/category-config-alist))
+
+  9. 还有哪些可以配置?
+
+     + =:show-meta=: 显示文章meta信息在文章的底部?
+     + =:uri-generator=: 为特定分类post生成uri使用的函数（非高端玩家不建议定制)
+     + =:uri-template=: 生成uri使用的模板
+     + =:sort-by=: 分类路面页中排序文章, 按发布时间 =:date= 还是最近修改时间 =:mod-date= ？
+     + =:category-index=: 为分类生成目录页?
+     + =:label=: 为分类显示标签 (默认值：分类文件夹名)
+
+  10. 为文章添加avatar?
+
+     : (setq op/personal-avatar "URL to an image")
+
+  11. 不发布某些分类?
+
+     : (setq op/category-ignore-list '("category1" "category2"))

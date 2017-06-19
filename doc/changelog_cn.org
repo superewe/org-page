@@ -1,0 +1,61 @@
+#+TITLE:       Change Log
+#+AUTHOR:      superewe
+#+EMAIL:       superewe@qq.com
+#+DATE:        2017-06-19
+
+
+* v0.7
+
+  - 增强帮助函数 =op/insert-options-template=.
+  - 增加新的帮助函数 =op/new-post=.
+
+* v0.6
+
+  - 实现 Push-to-Remote-Repo 功能.
+  - 添加新的评论系统: duoshuo. (感谢 [[https://github.com/naihe2010][naihe2010]])
+
+* v0.5
+
+  - 实现 RSS 功能
+  - 引入 *dash* 来操作列表
+  - 完善一些函数
+  - 更新文档
+
+* v0.41
+
+  - 提交到melpa
+  - 修复一些bug
+
+* v0.4
+
+  - 完善发布流程
+  - 完善模板系统
+  - 引入简单的缓存系统，增强发布性能
+  - 引入分类回退，参考 issue #66 on github
+  - 废弃/gray/主题, /mdo/ 成为默认主题
+
+* v0.3
+
+  - 使用git管理org源文件
+  - 使用 *mustache* 作为渲染引擎，代替原来的 =format-spec=
+  - 使用 *google analytics* 作为站点访问追踪系统
+  - 支持增量发布
+  - 支持org-mode v8.0, 不再支持低于v8.0版本 
+  - 采用新的主题 /mdo/
+  - 降低分类复杂性，只预设两个分类 "blog" 和 "wiki"
+
+* v0.2
+
+  - 使用 *disqus* 作为评论系统
+  - 减小依赖 (主要是org-mode发布过程)
+  - 研究org-mode导出html功能，是文章适应github pages
+  - 取消org源文件html格式化，实际中用处不大
+
+* v0.1
+
+  - 初始版本,基于emacs的org-mode和自带的发布流程，配置发布流程
+  - 支持分类
+  - 支持标签
+  - 支持主题
+  - 支持搜索引擎
+  - org源文件支持html格式化

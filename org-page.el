@@ -1,25 +1,6 @@
-;;; org-page.el --- static site generator based on org mode
+;;; org-page.el --- 基于org-mode的静态站点生成器
 
-;; Copyright (C) 2012, 2013, 2014 Kelvin Hu
-
-;; Author: Kelvin Hu <ini DOT kelvin AT gmail DOT com>
-;; Keywords: org-mode, convenience, beautify
-;; Homepage: https://github.com/kelvinh/org-page
-
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
-
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-;;; Commentary:
+;;; 注释:
 
 ;; See documentation at https://github.com/kelvinh/org-page
 
@@ -41,7 +22,7 @@
 ;; 12) site preview
 ;; 13) highly customizable
 
-;;; Code:
+;;; 代码:
 
 (require 'ox)
 (require 'ht)
@@ -51,39 +32,31 @@
 (require 'op-enhance)
 (require 'op-export)
 (require 'simple-httpd)
-
+;;org-page版本
 (defconst org-page-version "0.5")
-
+;;
 (defun op/do-publication (&optional force-all
                                     base-git-commit pub-base-dir
                                     auto-commit auto-push)
-  "The main entrance of org-page. The entire procedure is:
-1) verify configuration
-2) read changed files on branch `op/repository-org-branch' of repository
-`op/repository-directory', the definition of 'changed files' is:
-   1. if FORCE-ALL is non-nil, then all files will be published
-   2. if FORCE-ALL is nil, the changed files will be obtained based on
-BASE-GIT-COMMIT
-   3. if BASE-GIT-COMMIT is nil or omitted, the changed files will be obtained
-based on previous commit
-3) publish org files to html, if PUB-BASE-DIR is specified, use that directory
-to store the generated html files, otherwise html files will be stored on branch
-`op/repository-html-branch' of repository `op/repository-directory'
-4) if PUB-BASE-DIR is nil, and AUTO-COMMIT is non-nil, then the changes stored
-on branch `op/repository-html-branch' will be automatically committed, but be
-careful, this feature is NOT recommended, and a manual commit is much better
-5) if PUB-BASE-DIR is nil, AUTO-COMMIT is non-nil, and AUTO-PUSH is non-nil,
-then the branch `op/repository-html-branch' will be pushed to remote repo."
+  "org-page入口函数,整个工作流程:
+1) 验证配置
+2) 读取仓库`op/repository-directory'中分支`op/repository-org-branch'中变动文件.变动文件的定义为:
+   1. 如果FORCE-ALL 是 non-nil, 所有文件被发布
+   2. 如果FORCE-ALL 是 nil, 文件是否变动依据 BASE-GIT-COMMIT 判断
+   3. 如果BASE-GIT-COMMIT 是 nil 或者 没有设定, 文件是否变动依据上一次提交判定
+3)导出org文件为html.如果 PUB-BASE-DIR 指定,使用指定的目录保存生成的html文件,否则使用repository `op/repository-directory' 中的 branch`op/repository-html-branch' 
+4) 如果PUB-BASE-DIR 是 nil, 而且 AUTO-COMMIT 是 non-nil, 那么保存在`op/repository-html-branch'的变动,会自动提交.注意,这种操作不建议,手动提交更安全
+5) 如果 PUB-BASE-DIR 是 nil, AUTO-COMMIT 是 non-nil, 而且 AUTO-PUSH 是 non-nil, branch `op/repository-html-branch'会被push到远程仓库"
   (interactive
    (let* ((f (y-or-n-p "Publish all org files? "))
           (b (unless f (read-string "Base git commit: " "HEAD~1")))
           (p (when (y-or-n-p
                     "Publish to a directory? (to original repo if not) ")
-               (read-directory-name "Publication directory: ")))
+               (read-directory-name "html生成目录: ")))
           (a (when (not p)
-               (y-or-n-p "Auto commit to repo? ")))
+               (y-or-n-p "自动提交到本地仓库? ")))
           (u (when (and a (not p))
-               (y-or-n-p "Auto push to remote repo? "))))
+               (y-or-n-p "自动提交到远程仓库? "))))
      (list f b p a u)))
   (op/verify-configuration)
   (setq op/item-cache nil)
@@ -158,16 +131,16 @@ perfectly manipulated by org-page."
   (mkdir (expand-file-name "blog/" repo-dir) t))
 
 (defun op/verify-configuration ()
-  "Ensure all required configuration fields are properly configured, include:
+  "确保所需要的配置文件已经正确配置, 包括:
 `op/repository-directory': <required>
 `op/site-domain': <required>
 `op/personal-disqus-shortname': <optional>
 `op/personal-duoshuo-shortname': <optional>
 `op/export-backend': [optional](default 'html)
-`op/repository-org-branch': [optional] (but customization recommended)
-`op/repository-html-branch': [optional] (but customization recommended)
-`op/site-main-title': [optional] (but customization recommanded)
-`op/site-sub-title': [optional] (but customization recommanded)
+`op/repository-org-branch': [optional] (推荐定制)
+`op/repository-html-branch': [optional] (推荐定制)
+`op/site-main-title': [optional] (推荐定制)
+`op/site-sub-title': [optional] (推荐定制)
 `op/personal-github-link': [optional] (but customization recommended)
 `op/personal-google-analytics-id': [optional] (but customization recommended)
 `op/theme': [optional]
@@ -194,8 +167,7 @@ help configure it manually, usually it should be <org-page directory>/themes/."
     (setq op/highlight-render 'js)))
 
 (defun op/generate-readme (save-dir)
-  "Generate README for `op/new-repository'. SAVE-DIR is the directory where to
-save generated README."
+  "为`op/new-repository'生成README. SAVE-DIR是保存生成的README的目录"
   (string-to-file
    (concat
     (format "Personal site of %s, managed by emacs, org mode, git and org-page."
@@ -216,8 +188,7 @@ to save generated index.org."
    (expand-file-name "index.org" save-dir)))
 
 (defun op/generate-about (save-dir)
-  "Generate about.org for `op/new-repository'. SAVE-DIR is the directory where
-to save generated about.org."
+  "为 op/new-repository 生成about.org .SAVE-DIR 为保存生成的about.org的目录."
   (string-to-file
    (concat "#+TITLE: About" "\n\n"
            (format "* About %s" (or user-full-name "[Author]")) "\n\n"
@@ -226,20 +197,19 @@ to save generated about.org."
 
 (defun op/insert-options-template (&optional title uri
                                              keywords tags description)
-  "Insert a template into current buffer with information for exporting.
+  "在当前buffer中插入模板，为导出准备.
 
-TITLE: the title of this post
-URI: the uri of this post, usually looks like: /2013/12/27/the-post-title,
-the following parameters could be used:
-    %y: to represent the year of creation date
-    %m: to represent the month of creation date
-    %d: to represent the day of creation date
-KEYWORDS: the keywords of this post, used by search engine
-TAGS: the tags of this post, should be separated by comma and space
-DESCRIPTION: the description of this post, it will be displayed in RSS feed
+TITLE: 文章标题
+URI: 文章uri, 格式通常为: /2013/12/27/the-post-title,
+可以使用下面的参数:
+    %y: 当天所在的年
+    %m: 当天所在的月 
+    %d: 当天所在的日期
+KEYWORDS: post关键字,供搜引擎使用
+TAGS: post的tag,使用逗号或空格分割
+DESCRIPTION: post的描述,在RSS订阅中显示
 
-Note that this function does not verify the input parameters, it is users'
-responsibility to guarantee these parameters are valid."
+注意：函数不会验证输入的参数，用户需要自己确保参数的有效性"
   (interactive
    (let* ((i (read-string "Title: "))
           (u (read-string "URI(%y, %m and %d can be used to represent year, \
@@ -293,13 +263,13 @@ month and day): " (unless (string= i "")
              description))))
 
 (defun op/new-post (&optional category filename)
-  "Setup a new post.
+  "发布一个新的post.
 
-CATEGORY: this post belongs to
-FILENAME: the file name of this post
+CATEGORY: post的分类
+FILENAME: post的文件名
 
-Note that this function does not verify the category and filename, it is users'
-responsibility to guarantee the two parameters are valid."
+注意：函数不会验证分类和名字，用户需要自己确保这两个参数的有效性
+"
   (interactive
    (let* ((c (read-string "Category: " "blog"))
           (f (read-string "filename: " "new-post.org")))
